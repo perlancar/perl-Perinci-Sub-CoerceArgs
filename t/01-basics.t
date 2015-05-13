@@ -75,6 +75,56 @@ subtest "obj Time::Moment" => sub {
     }
 };
 
+
+subtest "date" => sub {
+    my $meta = {v=>1.1, args=>{t=>{schema=>'date'}}};
+    my $res;
+
+    {
+        $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
+        is($res->[0], 200) or last;
+        is_deeply($res->[2]{t}, "2015-05-13");
+    }
+
+    # coerce to DateTime object
+    {
+        local $meta->{args}{t}{'x.perl.coerce_to_datetime_obj'} = 1;
+        $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
+        is($res->[0], 200) or last;
+        ok($res->[2]{t}->isa("DateTime"));
+        is_deeply($res->[2]{t}->ymd, "2015-05-13");
+    }
+    # coerce to Time::Moment object
+    {
+        local $meta->{args}{t}{'x.perl.coerce_to_time_moment_obj'} = 1;
+        $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
+        is($res->[0], 200) or last;
+        ok($res->[2]{t}->isa("Time::Moment"));
+        is_deeply($res->[2]{t}->strftime("%Y-%m-%d"), "2015-05-13");
+    }
+};
+
+subtest "duration" => sub {
+    my $meta = {v=>1.1, args=>{t=>{schema=>'duration'}}};
+    my $res;
+
+    {
+        $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
+        is($res->[0], 200) or last;
+        is_deeply($res->[2]{t}, "P1Y2M");
+    }
+
+    # coerce to DateTime object
+    {
+        local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+        $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
+        is($res->[0], 200) or last;
+        ok($res->[2]{t}->isa("DateTime::Duration"));
+        is_deeply($res->[2]{t}->years, 1);
+        is_deeply($res->[2]{t}->months, 2);
+    }
+};
+
 subtest "filters" => sub {
     my $meta;
 

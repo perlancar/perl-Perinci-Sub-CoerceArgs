@@ -23,6 +23,98 @@ our %SPEC;
 #    require $class_pm;
 #}
 
+sub _coerce_to_datetime {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    if ($val =~ /\A\d{8,}\z/) {
+        require DateTime;
+        $args->{$arg_name} = DateTime->from_epoch(
+            epoch => $val,
+            time_zone => $ENV{TZ} // "UTC",
+        );
+        return [200];
+    } elsif ($val =~ m!\A
+                       (\d{4})[/-](\d{1,2})[/-](\d{1,2})
+                       (?:[ Tt](\d{1,2}):(\d{1,2}):(\d{1,2}))?
+                       \z!x) {
+        require DateTime;
+        $args->{$arg_name} = DateTime->new(
+            year => $1, month => $2, day => $3,
+            hour => $4 // 0,
+            minute => $4 // 0,
+            second => $4 // 0,
+            time_zone => $ENV{TZ} // "UTC",
+        );
+        return [200];
+    } else {
+        return [400, "Can't coerce DateTime object " .
+                 "'$arg_name' from '$args->{$arg_name}'"];
+    }
+}
+
+sub _coerce_to_datetime_duration {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    if ($val =~ /\AP
+                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
+                 (?:([0-9]+(?:\.[0-9]+)?)M)?
+                 (?:([0-9]+(?:\.[0-9]+)?)W)?
+                 (?:([0-9]+(?:\.[0-9]+)?)D)?
+                 (?: T
+                     (?:([0-9]+(?:\.[0-9]+)?)H)?
+                     (?:([0-9]+(?:\.[0-9]+)?)M)?
+                     (?:([0-9]+(?:\.[0-9]+)?)S)?
+                 )?\z/x) {
+        require DateTime::Duration;
+        $args->{$arg_name} = DateTime::Duration->new(
+            years   => $1 || 0,
+            months  => $2 || 0,
+            weeks   => $3 || 0,
+            days    => $4 || 0,
+            hours   => $5 || 0,
+            minutes => $6 || 0,
+            seconds => $7 || 0,
+        );
+        return [200];
+    } else {
+        return [400, "Can't coerce DateTime::Duration object " .
+                    "'$arg_name' from '$args->{$arg_name}'"];
+    }
+}
+
+sub _coerce_to_time_moment {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    # XXX just use Time::Moment's from_string()?
+    if ($val =~ /\A\d{8,}\z/) {
+        require Time::Moment;
+        $args->{$arg_name} = Time::Moment->from_epoch($val);
+        return [200];
+    } elsif ($val =~ m!\A
+                       (\d{4})[/-](\d{1,2})[/-](\d{1,2})
+                       (?:[ Tt](\d{1,2}):(\d{1,2}):(\d{1,2}))?
+                       \z!x) {
+        # XXX parse time zone offset
+        require Time::Moment;
+        $args->{$arg_name} = Time::Moment->new(
+            year => $1, month => $2, day => $3,
+            hour => $4 // 0,
+            minute => $4 // 0,
+            second => $4 // 0,
+        );
+        return [200];
+    } else {
+        return [400, "Can't coerce Time::Moment object " .
+                    "'$arg_name' from '$args->{$arg_name}'"];
+    }
+}
+
 $SPEC{coerce_args} = {
     v           => 1.1,
     summary     => 'Coerce arguments',
@@ -92,75 +184,27 @@ sub coerce_args {
                 my $class = $schema->[1]{isa} // '';
                 # convert DateTime object from epoch/some formatted string
                 if ($class eq 'DateTime') {
-                    if ($val =~ /\A\d{8,}\z/) {
-                        require DateTime;
-                        $args->{$arg_name} = DateTime->from_epoch(
-                            epoch => $val,
-                            time_zone => $ENV{TZ} // "UTC",
-                        );
-                    } elsif ($val =~ m!\A
-                                       (\d{4})[/-](\d{1,2})[/-](\d{1,2})
-                                       (?:[ Tt](\d{1,2}):(\d{1,2}):(\d{1,2}))?
-                                       \z!x) {
-                        require DateTime;
-                        $args->{$arg_name} = DateTime->new(
-                            year => $1, month => $2, day => $3,
-                            hour => $4 // 0,
-                            minute => $4 // 0,
-                            second => $4 // 0,
-                            time_zone => $ENV{TZ} // "UTC",
-                        );
-                    } else {
-                        return [400, "Can't coerce DateTime object " .
-                                    "'$arg_name' from '$args->{$arg_name}'"];
-                    }
+                    my $coerce_res = _coerce_to_datetime($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
                 } elsif ($class eq 'DateTime::Duration') {
-                    if ($val =~ /\AP
-                                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
-                                 (?:([0-9]+(?:\.[0-9]+)?)M)?
-                                 (?:([0-9]+(?:\.[0-9]+)?)W)?
-                                 (?:([0-9]+(?:\.[0-9]+)?)D)?
-                                 (?: T
-                                     (?:([0-9]+(?:\.[0-9]+)?)H)?
-                                     (?:([0-9]+(?:\.[0-9]+)?)M)?
-                                     (?:([0-9]+(?:\.[0-9]+)?)S)?
-                                 )?\z/x) {
-                        require DateTime::Duration;
-                        $args->{$arg_name} = DateTime::Duration->new(
-                            years   => $1 || 0,
-                            months  => $2 || 0,
-                            weeks   => $3 || 0,
-                            days    => $4 || 0,
-                            hours   => $5 || 0,
-                            minutes => $6 || 0,
-                            seconds => $7 || 0,
-                        );
-                    } else {
-                        return [400, "Can't coerce DateTime::Duration object " .
-                                    "'$arg_name' from '$args->{$arg_name}'"];
-                    }
+                    my $coerce_res = _coerce_to_datetime_duration($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
                 } elsif ($class eq 'Time::Moment') {
-                    # XXX just use Time::Moment's from_string()?
-                    if ($val =~ /\A\d{8,}\z/) {
-                        require Time::Moment;
-                        $args->{$arg_name} = Time::Moment->from_epoch($val);
-                    } elsif ($val =~ m!\A
-                                       (\d{4})[/-](\d{1,2})[/-](\d{1,2})
-                                       (?:[ Tt](\d{1,2}):(\d{1,2}):(\d{1,2}))?
-                                       \z!x) {
-                        # XXX parse time zone offset
-                        require Time::Moment;
-                        $args->{$arg_name} = Time::Moment->new(
-                            year => $1, month => $2, day => $3,
-                            hour => $4 // 0,
-                            minute => $4 // 0,
-                            second => $4 // 0,
-                        );
-                    } else {
-                        return [400, "Can't coerce Time::Moment object " .
-                                    "'$arg_name' from '$args->{$arg_name}'"];
-                    }
+                    my $coerce_res = _coerce_to_time_moment($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
                 }
+            } elsif ($schema->[0] eq 'date' &&
+                         $arg_spec->{'x.perl.coerce_to_datetime_obj'}) {
+                my $coerce_res = _coerce_to_datetime($args, $arg_name);
+                return $coerce_res unless $coerce_res->[0] == 200;
+            } elsif ($schema->[0] eq 'date' &&
+                         $arg_spec->{'x.perl.coerce_to_time_moment_obj'}) {
+                my $coerce_res = _coerce_to_time_moment($args, $arg_name);
+                return $coerce_res unless $coerce_res->[0] == 200;
+            } elsif ($schema->[0] eq 'duration' &&
+                         $arg_spec->{'x.perl.coerce_to_datetime_duration_obj'}) {
+                my $coerce_res = _coerce_to_datetime_duration($args, $arg_name);
+                return $coerce_res unless $coerce_res->[0] == 200;
             }
         } # has schema
     }
