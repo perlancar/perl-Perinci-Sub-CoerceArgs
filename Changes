@@ -1,5 +1,10 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.02    2015-05-13 (PERLANCAR)
+
+	- Add support for coercing DateTime::Duration objects.
+
+
 0.01     2015-03-29 (PERLANCAR)
 
          - First release.
