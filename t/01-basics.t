@@ -36,6 +36,22 @@ subtest "obj DateTime" => sub {
     }
 };
 
+subtest "obj DateTime::Duration" => sub {
+    plan skip_all => "DateTime::Duration module not available"
+        unless eval "require DateTime::Duration; 1";
+
+    my $meta = {v=>1.1, args=>{t=>{schema=>[obj=>isa=>"DateTime::Duration"]}}};
+    my $res;
+
+    {
+        $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
+        is($res->[0], 200) or last;
+        ok($res->[2]{t}->isa("DateTime::Duration"));
+        is($res->[2]{t}->years, 1);
+        is($res->[2]{t}->months, 2);
+    }
+};
+
 subtest "obj Time::Moment" => sub {
     plan skip_all => "Time::Moment module not available"
         unless eval "require Time::Moment; 1";

@@ -114,6 +114,31 @@ sub coerce_args {
                         return [400, "Can't coerce DateTime object " .
                                     "'$arg_name' from '$args->{$arg_name}'"];
                     }
+                } elsif ($class eq 'DateTime::Duration') {
+                    if ($val =~ /\AP
+                                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
+                                 (?:([0-9]+(?:\.[0-9]+)?)M)?
+                                 (?:([0-9]+(?:\.[0-9]+)?)W)?
+                                 (?:([0-9]+(?:\.[0-9]+)?)D)?
+                                 (?: T
+                                     (?:([0-9]+(?:\.[0-9]+)?)H)?
+                                     (?:([0-9]+(?:\.[0-9]+)?)M)?
+                                     (?:([0-9]+(?:\.[0-9]+)?)S)?
+                                 )?\z/x) {
+                        require DateTime::Duration;
+                        $args->{$arg_name} = DateTime::Duration->new(
+                            years   => $1 || 0,
+                            months  => $2 || 0,
+                            weeks   => $3 || 0,
+                            days    => $4 || 0,
+                            hours   => $5 || 0,
+                            minutes => $6 || 0,
+                            seconds => $7 || 0,
+                        );
+                    } else {
+                        return [400, "Can't coerce DateTime::Duration object " .
+                                    "'$arg_name' from '$args->{$arg_name}'"];
+                    }
                 } elsif ($class eq 'Time::Moment') {
                     # XXX just use Time::Moment's from_string()?
                     if ($val =~ /\A\d{8,}\z/) {
