@@ -77,6 +77,8 @@ subtest "obj Time::Moment" => sub {
 
 
 subtest "date" => sub {
+    plan skip_all => "Time::Moment module not available"
+        unless eval "require Time::Moment; 1";
     my $meta = {v=>1.1, args=>{t=>{schema=>'date'}}};
     my $res;
 
