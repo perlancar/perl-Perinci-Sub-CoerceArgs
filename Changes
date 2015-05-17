@@ -1,5 +1,13 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.04    2015-05-17 (PERLANCAR)
+
+	- No functional changes.
+
+	- Skip some tests when DateTime/Time::Moment is not available
+	  [GH#1].
+
+
 0.03    2015-05-13 (PERLANCAR)
 
 	- Observe argument specification attributes:
