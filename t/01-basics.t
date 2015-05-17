@@ -15,7 +15,7 @@ subtest "opt:meta_is_normalized" => sub {
 
 subtest "obj DateTime" => sub {
     plan skip_all => "DateTime module not available"
-        unless eval "require DateTime; 1";
+        unless eval { require DateTime; 1 };
 
     my $meta = {v=>1.1, args=>{t=>{schema=>[obj=>isa=>"DateTime"]}}};
     my $res;
@@ -38,7 +38,7 @@ subtest "obj DateTime" => sub {
 
 subtest "obj DateTime::Duration" => sub {
     plan skip_all => "DateTime::Duration module not available"
-        unless eval "require DateTime::Duration; 1";
+        unless eval { require DateTime::Duration; 1 };
 
     my $meta = {v=>1.1, args=>{t=>{schema=>[obj=>isa=>"DateTime::Duration"]}}};
     my $res;
@@ -54,7 +54,7 @@ subtest "obj DateTime::Duration" => sub {
 
 subtest "obj Time::Moment" => sub {
     plan skip_all => "Time::Moment module not available"
-        unless eval "require Time::Moment; 1";
+        unless eval { require Time::Moment; 1 };
 
     my $meta = {v=>1.1, args=>{t=>{schema=>[obj=>isa=>"Time::Moment"]}}};
     my $res;
@@ -77,6 +77,11 @@ subtest "obj Time::Moment" => sub {
 
 
 subtest "date" => sub {
+    plan skip_all => "DateTime module not available"
+        unless eval { require DateTime; 1 };
+    plan skip_all => "Time::Moment module not available"
+        unless eval { require Time::Moment; 1 };
+
     my $meta = {v=>1.1, args=>{t=>{schema=>'date'}}};
     my $res;
 
@@ -105,6 +110,9 @@ subtest "date" => sub {
 };
 
 subtest "duration" => sub {
+    plan skip_all => "DateTime module not available"
+        unless eval { require DateTime; 1 };
+
     my $meta = {v=>1.1, args=>{t=>{schema=>'duration'}}};
     my $res;
 
