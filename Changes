@@ -1,5 +1,10 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.06    2015-09-25 (PERLANCAR)
+
+	- Support coercing positive numbers to duration object.
+
+
 0.05    2015-09-03 (PERLANCAR)
 
 	- No functional changes.
