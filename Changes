@@ -1,5 +1,11 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.09    2015-09-25 (PERLANCAR)
+
+	- [Incompatible change] Change coercion hint attribute from
+	  x.perl.coerce_to_* to x.perl.coerce_to.
+
+
 0.08    2015-09-25 (PERLANCAR)
 
 	- Support coercing duration from string parseable by
