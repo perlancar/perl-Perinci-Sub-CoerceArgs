@@ -1,5 +1,13 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.07    2015-09-25 (PERLANCAR)
+
+	- Support coercing date to epoch (x.perl.coerce_to_epoch) &
+	  duration to secs (x.perl.coerce_to_secs).
+
+        - Add more tests.
+
+
 0.06    2015-09-25 (PERLANCAR)
 
 	- Support coercing positive numbers to duration object.
