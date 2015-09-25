@@ -346,16 +346,4 @@ sub coerce_args {
 I expect this to be a temporary solution until L<Data::Sah> or
 L<Perinci::Sub::Wrapper> has this functionality.
 
-Some notes:
-
-=over
-
-=item *
-
-For convenience, when converting duration larger than 86400 from seconds (e.g.
-864000) into L<DateTime::Duration> object, C<days> and C<seconds> will be used
-instead of just C<seconds> (i.e., we disregard leap seconds).
-
-=back
-
 =cut
