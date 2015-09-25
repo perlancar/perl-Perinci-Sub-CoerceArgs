@@ -59,7 +59,13 @@ sub _coerce_to_datetime_duration {
 
     my $val = $args->{$arg_name};
 
-    if ($val =~ /\AP
+    if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
+        require DateTime::Duration;
+        $args->{$arg_name} = DateTime::Duration->new(
+            seconds => $val,
+        );
+        return [200];
+    } elsif ($val =~ /\AP
                  (?:([0-9]+(?:\.[0-9]+)?)Y)?
                  (?:([0-9]+(?:\.[0-9]+)?)M)?
                  (?:([0-9]+(?:\.[0-9]+)?)W)?

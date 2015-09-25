@@ -50,6 +50,13 @@ subtest "obj DateTime::Duration" => sub {
         is($res->[2]{t}->years, 1);
         is($res->[2]{t}->months, 2);
     }
+
+    {
+        $res = coerce_args(meta=>$meta, args=>{t=>"55"});
+        is($res->[0], 200) or last;
+        ok($res->[2]{t}->isa("DateTime::Duration"));
+        is($res->[2]{t}->seconds, 55);
+    }
 };
 
 subtest "obj Time::Moment" => sub {
