@@ -8,6 +8,8 @@ use strict;
 use warnings;
 #use Log::Any '$log';
 
+use Scalar::Util qw(blessed looks_like_number);
+
 use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
@@ -48,48 +50,25 @@ sub _coerce_to_datetime {
             time_zone => $ENV{TZ} // "UTC",
         );
         return [200];
-    } else {
-        return [400, "Can't coerce DateTime object " .
-                 "'$arg_name' from '$args->{$arg_name}'"];
+    } elsif (blessed($val)) {
+        if ($val->isa("DateTime")) {
+            # no-op
+            return [200];
+        } elsif ($val->isa("Time::Moment")) {
+            require DateTime;
+            my $tz = sprintf("%s%04d",
+                             $val->offset < 0 ? "-":"+",
+                             abs($val->offset/60*100));
+            $args->{$arg_name} = DateTime->from_epoch(
+                epoch => $val->epoch,
+                time_zone => $tz,
+            );
+            return [200];
+        }
     }
-}
 
-sub _coerce_to_datetime_duration {
-    my ($args, $arg_name) = @_;
-
-    my $val = $args->{$arg_name};
-
-    if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
-        require DateTime::Duration;
-        $args->{$arg_name} = DateTime::Duration->new(
-            seconds => $val,
-        );
-        return [200];
-    } elsif ($val =~ /\AP
-                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
-                 (?:([0-9]+(?:\.[0-9]+)?)M)?
-                 (?:([0-9]+(?:\.[0-9]+)?)W)?
-                 (?:([0-9]+(?:\.[0-9]+)?)D)?
-                 (?: T
-                     (?:([0-9]+(?:\.[0-9]+)?)H)?
-                     (?:([0-9]+(?:\.[0-9]+)?)M)?
-                     (?:([0-9]+(?:\.[0-9]+)?)S)?
-                 )?\z/x) {
-        require DateTime::Duration;
-        $args->{$arg_name} = DateTime::Duration->new(
-            years   => $1 || 0,
-            months  => $2 || 0,
-            weeks   => $3 || 0,
-            days    => $4 || 0,
-            hours   => $5 || 0,
-            minutes => $6 || 0,
-            seconds => $7 || 0,
-        );
-        return [200];
-    } else {
-        return [400, "Can't coerce DateTime::Duration object " .
-                    "'$arg_name' from '$args->{$arg_name}'"];
-    }
+    return [400, "Can't coerce '$arg_name' to DateTime object: " .
+                "'$args->{$arg_name}'"];
 }
 
 sub _coerce_to_time_moment {
@@ -115,10 +94,137 @@ sub _coerce_to_time_moment {
             second => $4 // 0,
         );
         return [200];
-    } else {
-        return [400, "Can't coerce Time::Moment object " .
-                    "'$arg_name' from '$args->{$arg_name}'"];
+    } elsif (blessed($val)) {
+        if ($val->isa("Time::Moment")) {
+            # no-op
+            return [200];
+        } elsif ($val->isa("DateTime")) {
+            require Time::Moment;
+            $args->{$arg_name} = Time::Moment->from_object($val);
+            return [200];
+        }
     }
+
+    return [400, "Can't coerce '$arg_name' to Time::Moment object: " .
+                "'$args->{$arg_name}'"];
+}
+
+sub _coerce_to_epoch {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    if (looks_like_number($val)) {
+        # no-op
+        return [200];
+    } elsif ($val =~ m!\A
+                       (\d{4})[/-](\d{1,2})[/-](\d{1,2})
+                       (?:[ Tt](\d{1,2}):(\d{1,2}):(\d{1,2}))?
+                       \z!x) {
+        require DateTime;
+        $args->{$arg_name} = DateTime->new(
+            year => $1, month => $2, day => $3,
+            hour => $4 // 0,
+            minute => $4 // 0,
+            second => $4 // 0,
+            time_zone => $ENV{TZ} // "UTC",
+        )->epoch;
+        return [200];
+    } elsif (blessed($val)) {
+        if ($val->isa("DateTime")) {
+            $args->{$arg_name} = $val->epoch;
+            return [200];
+        } elsif ($val->isa("Time::Moment")) {
+            $args->{$arg_name} = $val->epoch;
+            return [200];
+        }
+    }
+
+    return [400, "Can't coerce epoch " .
+                "'$arg_name' from '$args->{$arg_name}'"];
+}
+
+sub _coerce_to_datetime_duration {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
+        require DateTime::Duration;
+        my $days = int($val/86400);
+        my $secs = $val - $days*86400;
+        $args->{$arg_name} = DateTime::Duration->new(
+            days    => $days,
+            seconds => $secs,
+        );
+        return [200];
+    } elsif ($val =~ /\AP
+                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
+                 (?:([0-9]+(?:\.[0-9]+)?)M)?
+                 (?:([0-9]+(?:\.[0-9]+)?)W)?
+                 (?:([0-9]+(?:\.[0-9]+)?)D)?
+                 (?: T
+                     (?:([0-9]+(?:\.[0-9]+)?)H)?
+                     (?:([0-9]+(?:\.[0-9]+)?)M)?
+                     (?:([0-9]+(?:\.[0-9]+)?)S)?
+                 )?\z/x) {
+        require DateTime::Duration;
+        $args->{$arg_name} = DateTime::Duration->new(
+            years   => $1 || 0,
+            months  => $2 || 0,
+            weeks   => $3 || 0,
+            days    => $4 || 0,
+            hours   => $5 || 0,
+            minutes => $6 || 0,
+            seconds => $7 || 0,
+        );
+        return [200];
+    } elsif (blessed($val)) {
+        if ($val->isa("DateTime::Duration")) {
+            # no-op
+            return [200];
+        }
+    }
+
+    return [400, "Can't coerce '$arg_name' to DateTime::Duration object: " .
+                "'$args->{$arg_name}'"];
+}
+
+sub _coerce_to_secs {
+    my ($args, $arg_name) = @_;
+
+    my $val = $args->{$arg_name};
+
+    if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
+        # no-op
+        return [200];
+    } elsif ($val =~ /\AP
+                 (?:([0-9]+(?:\.[0-9]+)?)Y)?
+                 (?:([0-9]+(?:\.[0-9]+)?)M)?
+                 (?:([0-9]+(?:\.[0-9]+)?)W)?
+                 (?:([0-9]+(?:\.[0-9]+)?)D)?
+                 (?: T
+                     (?:([0-9]+(?:\.[0-9]+)?)H)?
+                     (?:([0-9]+(?:\.[0-9]+)?)M)?
+                     (?:([0-9]+(?:\.[0-9]+)?)S)?
+                 )?\z/x) {
+        $args->{$arg_name} =
+            (($1//0)*365 + ($2 // 0)*30 + ($3 // 0)*7 + ($4 // 0)) * 86400 +
+            ($5 // 0)*3600 + ($6 // 0)*60 + ($7 // 0);
+        return [200];
+    } elsif (blessed($val)) {
+        if ($val->isa("DateTime::Duration")) {
+            my ($y, $mon, $d, $min, $s) = $val->in_units(
+                "years", "months", "days", "minutes", "seconds");
+            $args->{$arg_name} =
+                ($y*365 + $mon*30 + $d) * 86400 +
+                $min*60 + $s;
+            return [200];
+        }
+    }
+
+    return [400, "Can't coerce '$arg_name' to DateTime::Duration object: " .
+                "'$args->{$arg_name}'"];
 }
 
 $SPEC{coerce_args} = {
@@ -162,7 +268,7 @@ sub coerce_args {
 
     for my $arg_name (keys %$args) {
         my $val = $args->{$arg_name};
-        next unless defined($val) && !ref($val);
+        next unless defined($val);
         my $arg_spec = $meta->{args}{$arg_name};
         next unless $arg_spec;
 
@@ -199,18 +305,25 @@ sub coerce_args {
                     my $coerce_res = _coerce_to_time_moment($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
                 }
-            } elsif ($schema->[0] eq 'date' &&
-                         $arg_spec->{'x.perl.coerce_to_datetime_obj'}) {
-                my $coerce_res = _coerce_to_datetime($args, $arg_name);
-                return $coerce_res unless $coerce_res->[0] == 200;
-            } elsif ($schema->[0] eq 'date' &&
-                         $arg_spec->{'x.perl.coerce_to_time_moment_obj'}) {
-                my $coerce_res = _coerce_to_time_moment($args, $arg_name);
-                return $coerce_res unless $coerce_res->[0] == 200;
-            } elsif ($schema->[0] eq 'duration' &&
-                         $arg_spec->{'x.perl.coerce_to_datetime_duration_obj'}) {
-                my $coerce_res = _coerce_to_datetime_duration($args, $arg_name);
-                return $coerce_res unless $coerce_res->[0] == 200;
+            } elsif ($schema->[0] eq 'date') {
+                if ($arg_spec->{'x.perl.coerce_to_datetime_obj'}) {
+                    my $coerce_res = _coerce_to_datetime($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
+                } elsif ($arg_spec->{'x.perl.coerce_to_time_moment_obj'}) {
+                    my $coerce_res = _coerce_to_time_moment($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
+                } elsif ($arg_spec->{'x.perl.coerce_to_epoch'}) {
+                    my $coerce_res = _coerce_to_epoch($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
+                }
+            } elsif ($schema->[0] eq 'duration') {
+                if ($arg_spec->{'x.perl.coerce_to_datetime_duration_obj'}) {
+                    my $coerce_res = _coerce_to_datetime_duration($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
+                } elsif ($arg_spec->{'x.perl.coerce_to_secs'}) {
+                    my $coerce_res = _coerce_to_secs($args, $arg_name);
+                    return $coerce_res unless $coerce_res->[0] == 200;
+                }
             }
         } # has schema
     }
@@ -232,5 +345,17 @@ sub coerce_args {
 
 I expect this to be a temporary solution until L<Data::Sah> or
 L<Perinci::Sub::Wrapper> has this functionality.
+
+Some notes:
+
+=over
+
+=item *
+
+For convenience, when converting duration larger than 86400 from seconds (e.g.
+864000) into L<DateTime::Duration> object, C<days> and C<seconds> will be used
+instead of just C<seconds> (i.e., we disregard leap seconds).
+
+=back
 
 =cut
