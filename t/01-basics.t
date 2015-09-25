@@ -242,7 +242,13 @@ subtest "type:duration" => sub {
         {
             $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
             is($res->[0], 200) or last;
-            is_deeply($res->[2]{t}, "P1Y2M");
+            is($res->[2]{t}, "P1Y2M");
+        }
+        # no coercion from string parseable by T:D:P:AsHash
+        {
+            $res = coerce_args(meta=>$meta, args=>{t=>"1 year 2 months"});
+            is($res->[0], 200) or last;
+            is($res->[2]{t}, "1 year 2 months");
         }
         # no coercion from secs
         {
@@ -264,6 +270,15 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
             $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
+            is($res->[0], 200) or last;
+            ok($res->[2]{t}->isa("DateTime::Duration"));
+            is_deeply($res->[2]{t}->years, 1);
+            is_deeply($res->[2]{t}->months, 2);
+        }
+        # from string parseable by T:D:P:AsHash
+        {
+            local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+            $res = coerce_args(meta=>$meta, args=>{t=>"1 year 2 months"});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime::Duration"));
             is_deeply($res->[2]{t}->years, 1);
@@ -303,6 +318,14 @@ subtest "type:duration" => sub {
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 86400);
+        }
+        # from string parseable by T:D:P:AsHash
+        {
+            local $meta->{args}{t}{'x.perl.coerce_to_secs'} = 1;
+            $res = coerce_args(meta=>$meta, args=>{t=>"3h 4min"});
+            is($res->[0], 200) or last;
+            ok(!ref($res->[2]{t}));
+            is($res->[2]{t}, 11040);
         }
     };
 };

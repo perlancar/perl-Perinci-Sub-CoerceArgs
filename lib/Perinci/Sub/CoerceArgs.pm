@@ -149,6 +149,8 @@ sub _coerce_to_datetime_duration {
 
     my $val = $args->{$arg_name};
 
+    my $d;
+
     if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
         require DateTime::Duration;
         my $days = int($val/86400);
@@ -184,6 +186,18 @@ sub _coerce_to_datetime_duration {
             # no-op
             return [200];
         }
+    } elsif (eval { require Time::Duration::Parse::AsHash; $d = Time::Duration::Parse::AsHash::parse_duration($val) } && !$@) {
+        require DateTime::Duration;
+        $args->{$arg_name} = DateTime::Duration->new(
+            years   => $d->{years}   || 0,
+            months  => $d->{months}  || 0,
+            weeks   => $d->{weeks}   || 0,
+            days    => $d->{days}    || 0,
+            hours   => $d->{hours}   || 0,
+            minutes => $d->{minutes} || 0,
+            seconds => $d->{seconds} || 0,
+        );
+        return [200];
     }
 
     return [400, "Can't coerce '$arg_name' to DateTime::Duration object: " .
@@ -194,6 +208,8 @@ sub _coerce_to_secs {
     my ($args, $arg_name) = @_;
 
     my $val = $args->{$arg_name};
+
+    my $d;
 
     if ($val =~ /\A\+?\d+(?:\.\d*)?\z/) {
         # no-op
@@ -221,9 +237,12 @@ sub _coerce_to_secs {
                 $min*60 + $s;
             return [200];
         }
+    } elsif (eval { require Time::Duration::Parse; $d = Time::Duration::Parse::parse_duration($val) } && !$@) {
+        $args->{$arg_name} = $d;
+        return [200];
     }
 
-    return [400, "Can't coerce '$arg_name' to DateTime::Duration object: " .
+    return [400, "Can't coerce '$arg_name' to seconds: " .
                 "'$args->{$arg_name}'"];
 }
 
