@@ -311,6 +311,7 @@ sub coerce_args {
         }
 
         if (my $schema = $arg_spec->{schema}) {
+            my $coerce_to = $arg_spec->{'x.perl.coerce_to'} // '';
             if ($schema->[0] eq 'obj') {
                 my $class = $schema->[1]{isa} // '';
                 # convert DateTime object from epoch/some formatted string
@@ -325,21 +326,21 @@ sub coerce_args {
                     return $coerce_res unless $coerce_res->[0] == 200;
                 }
             } elsif ($schema->[0] eq 'date') {
-                if ($arg_spec->{'x.perl.coerce_to_datetime_obj'}) {
+                if ($coerce_to eq 'DateTime') {
                     my $coerce_res = _coerce_to_datetime($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
-                } elsif ($arg_spec->{'x.perl.coerce_to_time_moment_obj'}) {
+                } elsif ($coerce_to eq 'Time::Moment') {
                     my $coerce_res = _coerce_to_time_moment($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
-                } elsif ($arg_spec->{'x.perl.coerce_to_epoch'}) {
+                } elsif ($coerce_to eq 'int(epoch)') {
                     my $coerce_res = _coerce_to_epoch($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
                 }
             } elsif ($schema->[0] eq 'duration') {
-                if ($arg_spec->{'x.perl.coerce_to_datetime_duration_obj'}) {
+                if ($coerce_to eq 'DateTime::Duration') {
                     my $coerce_res = _coerce_to_datetime_duration($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
-                } elsif ($arg_spec->{'x.perl.coerce_to_secs'}) {
+                } elsif ($coerce_to eq 'int(secs)') {
                     my $coerce_res = _coerce_to_secs($args, $arg_name);
                     return $coerce_res unless $coerce_res->[0] == 200;
                 }

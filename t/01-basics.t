@@ -123,14 +123,14 @@ subtest "type:date" => sub {
     subtest "coercion to DateTime object" => sub {
         # from DateTime object, no-op
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->now});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime"));
         }
         # from YYYY-MM-DD string
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime"));
@@ -138,14 +138,14 @@ subtest "type:date" => sub {
         }
         # from Time::Moment object
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->now});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime"));
         }
         # from epoch
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime"));
@@ -156,14 +156,14 @@ subtest "type:date" => sub {
     subtest "coercion to Time::Moment object" => sub {
         # from Time::Moment object, no-op
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_time_moment_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->now});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("Time::Moment"));
         }
         # from YYYY-MM-DD string
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_time_moment_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("Time::Moment"));
@@ -171,14 +171,14 @@ subtest "type:date" => sub {
         }
         # from DateTime object
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_time_moment_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->now});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("Time::Moment"));
         }
         # from epoch
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_time_moment_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("Time::Moment"));
@@ -189,7 +189,7 @@ subtest "type:date" => sub {
     subtest "coercion to epoch" => sub {
         # from epoch, no-op
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_epoch'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
@@ -197,7 +197,7 @@ subtest "type:date" => sub {
         }
         # from YYY-MM-DD string
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_epoch'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
@@ -205,7 +205,7 @@ subtest "type:date" => sub {
         }
         # from DateTime object
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_epoch'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             my $now = time();
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->from_epoch(epoch => $now)});
             is($res->[0], 200) or last;
@@ -214,7 +214,7 @@ subtest "type:date" => sub {
         }
         # from Time::Moment object
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_epoch'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             my $now = time();
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->from_epoch($now)});
             is($res->[0], 200) or last;
@@ -261,14 +261,14 @@ subtest "type:duration" => sub {
     subtest "coercion to DateTime::Duration object" => sub {
         # from DateTime::Duration object, no-op
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime::Duration->new(seconds=>55)});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime::Duration"));
         }
         # from P string
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime::Duration"));
@@ -277,7 +277,7 @@ subtest "type:duration" => sub {
         }
         # from string parseable by T:D:P:AsHash
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>"1 year 2 months"});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime::Duration"));
@@ -286,7 +286,7 @@ subtest "type:duration" => sub {
         }
         # from secs
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_datetime_duration_obj'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>55});
             is($res->[0], 200) or last;
             ok($res->[2]{t}->isa("DateTime::Duration"));
@@ -297,7 +297,7 @@ subtest "type:duration" => sub {
     subtest "coercion to secs" => sub {
         # from secs, no-op
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_secs'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>55});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
@@ -305,7 +305,7 @@ subtest "type:duration" => sub {
         }
         # from DateTime::Duration object
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_secs'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime::Duration->new(years=>1, months=>2, days=>3, hours=>4, minutes=>5, seconds=>55)});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
@@ -313,7 +313,7 @@ subtest "type:duration" => sub {
         }
         # from P string
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_secs'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>"P1D"});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
@@ -321,7 +321,7 @@ subtest "type:duration" => sub {
         }
         # from string parseable by T:D:P:AsHash
         {
-            local $meta->{args}{t}{'x.perl.coerce_to_secs'} = 1;
+            local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>"3h 4min"});
             is($res->[0], 200) or last;
             ok(!ref($res->[2]{t}));
