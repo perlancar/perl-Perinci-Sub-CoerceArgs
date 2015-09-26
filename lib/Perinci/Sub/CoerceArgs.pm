@@ -237,7 +237,7 @@ sub _coerce_to_secs {
                 $min*60 + $s;
             return [200];
         }
-    } elsif (eval { require Time::Duration::Parse; $d = Time::Duration::Parse::parse_duration($val) } && !$@) {
+    } elsif (eval { require Time::Duration::Parse::AsHash; $d = Time::Duration::Parse::AsHash::parse_duration($val) } && !$@) {
         $args->{$arg_name} = $d;
         return [200];
     }
