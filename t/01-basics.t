@@ -227,6 +227,8 @@ subtest "type:date" => sub {
 subtest "type:duration" => sub {
     plan skip_all => "DateTime::Duration module not available"
         unless eval { require DateTime::Duration; 1 };
+    plan skip_all => "Time::Duration::Parse::AsHash module not available"
+        unless eval { require Time::Duration::Parse::AsHash; 1 };
 
     my $meta = {v=>1.1, args=>{t=>{schema=>'duration'}}};
     my $res;
