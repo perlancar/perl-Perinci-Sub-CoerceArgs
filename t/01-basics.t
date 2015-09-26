@@ -22,7 +22,7 @@ subtest "type:DateTime obj" => sub {
 
     {
         $res = coerce_args(meta=>$meta, args=>{t=>"2015-03-28"});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("DateTime"));
         is($res->[2]{t}->ymd, "2015-03-28");
     }
@@ -30,7 +30,7 @@ subtest "type:DateTime obj" => sub {
     {
         local $ENV{TZ} = 'UTC';
         $res = coerce_args(meta=>$meta, args=>{t=>1427521689});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("DateTime"));
         is($res->[2]{t}->ymd, "2015-03-28");
     }
@@ -45,7 +45,7 @@ subtest "type DateTime::Duration obj" => sub {
 
     {
         $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("DateTime::Duration"));
         is($res->[2]{t}->years, 1);
         is($res->[2]{t}->months, 2);
@@ -53,7 +53,7 @@ subtest "type DateTime::Duration obj" => sub {
 
     {
         $res = coerce_args(meta=>$meta, args=>{t=>"55"});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("DateTime::Duration"));
         is($res->[2]{t}->seconds, 55);
     }
@@ -68,7 +68,7 @@ subtest "type:Time::Moment obj" => sub {
 
     {
         $res = coerce_args(meta=>$meta, args=>{t=>"2015-03-28"});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("Time::Moment"));
         is($res->[2]{t}->strftime("%Y-%m-%d"), "2015-03-28");
     }
@@ -76,7 +76,7 @@ subtest "type:Time::Moment obj" => sub {
     {
         local $ENV{TZ} = 'UTC';
         $res = coerce_args(meta=>$meta, args=>{t=>1427521689});
-        is($res->[0], 200) or last;
+        is($res->[0], 200) or do { diag explain $res; last };
         ok($res->[2]{t}->isa("Time::Moment"));
         is($res->[2]{t}->strftime("%Y-%m-%d"), "2015-03-28");
     }
@@ -97,25 +97,25 @@ subtest "type:date" => sub {
         # no coercion of YYYY-MM-DD string
         {
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             is_deeply($res->[2]{t}, "2015-05-13");
         }
         # no coercion of DateTime object
         {
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime"));
         }
         # no coercion of Time::Moment object
         {
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("Time::Moment"));
         }
         # no coercion of epoch number
         {
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             is($res->[2]{t}, 1_000_000_000);
         }
     };
@@ -125,14 +125,14 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime"));
         }
         # from YYYY-MM-DD string
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime"));
             is_deeply($res->[2]{t}->ymd, "2015-05-13");
         }
@@ -140,14 +140,14 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime"));
         }
         # from epoch
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime"));
             is_deeply($res->[2]{t}->year, 2001);
         }
@@ -158,14 +158,14 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("Time::Moment"));
         }
         # from YYYY-MM-DD string
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("Time::Moment"));
             is_deeply($res->[2]{t}->strftime("%Y-%m-%d"), "2015-05-13");
         }
@@ -173,14 +173,14 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->now});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("Time::Moment"));
         }
         # from epoch
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'Time::Moment';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("Time::Moment"));
             is_deeply($res->[2]{t}->year, 2001);
         }
@@ -191,7 +191,7 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             $res = coerce_args(meta=>$meta, args=>{t=>1_000_000_000});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 1_000_000_000);
         }
@@ -199,7 +199,7 @@ subtest "type:date" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             $res = coerce_args(meta=>$meta, args=>{t=>"2015-05-13"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             ok($res->[2]{t} > 1_000_000_000);
         }
@@ -208,7 +208,7 @@ subtest "type:date" => sub {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             my $now = time();
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime->from_epoch(epoch => $now)});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             ok($res->[2]{t} > 1_000_000_000);
         }
@@ -217,7 +217,7 @@ subtest "type:date" => sub {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(epoch)';
             my $now = time();
             $res = coerce_args(meta=>$meta, args=>{t=>Time::Moment->from_epoch($now)});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, $now);
         }
@@ -235,25 +235,25 @@ subtest "type:duration" => sub {
         # no coercion from DateTime::Duration object
         {
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime::Duration->new(seconds=>55)});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime::Duration"));
         }
         # no coercion from P string
         {
             $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             is($res->[2]{t}, "P1Y2M");
         }
         # no coercion from string parseable by T:D:P:AsHash
         {
             $res = coerce_args(meta=>$meta, args=>{t=>"1 year 2 months"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             is($res->[2]{t}, "1 year 2 months");
         }
         # no coercion from secs
         {
             $res = coerce_args(meta=>$meta, args=>{t=>55});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             is_deeply($res->[2]{t}, 55);
         }
     };
@@ -263,14 +263,14 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime::Duration->new(seconds=>55)});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime::Duration"));
         }
         # from P string
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>"P1Y2M"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime::Duration"));
             is_deeply($res->[2]{t}->years, 1);
             is_deeply($res->[2]{t}->months, 2);
@@ -279,7 +279,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>"1 year 2 months"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime::Duration"));
             is_deeply($res->[2]{t}->years, 1);
             is_deeply($res->[2]{t}->months, 2);
@@ -288,7 +288,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'DateTime::Duration';
             $res = coerce_args(meta=>$meta, args=>{t=>55});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok($res->[2]{t}->isa("DateTime::Duration"));
             is_deeply($res->[2]{t}->seconds, 55);
         }
@@ -299,7 +299,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>55});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 55);
         }
@@ -307,7 +307,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>DateTime::Duration->new(years=>1, months=>2, days=>3, hours=>4, minutes=>5, seconds=>55)});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 36993955);
         }
@@ -315,7 +315,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>"P1D"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 86400);
         }
@@ -323,7 +323,7 @@ subtest "type:duration" => sub {
         {
             local $meta->{args}{t}{'x.perl.coerce_to'} = 'int(secs)';
             $res = coerce_args(meta=>$meta, args=>{t=>"3h 4min"});
-            is($res->[0], 200) or last;
+            is($res->[0], 200) or do { diag explain $res; last };
             ok(!ref($res->[2]{t}));
             is($res->[2]{t}, 11040);
         }
