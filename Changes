@@ -1,5 +1,13 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.11    2015-09-26 (PERLANCAR)
+
+	- No functional changes.
+
+	- Skip duration type tests when Time::Duration::Parse::AsHash
+	  (runtime recommends) is not available [CT].
+
+
 0.10    2015-09-26 (PERLANCAR)
 
 	- Standardize on Time::Duration::Parse::AsHash instead of that plus
