@@ -1,5 +1,11 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.10    2015-09-26 (PERLANCAR)
+
+	- Standardize on Time::Duration::Parse::AsHash instead of that plus
+	  Time::Duration::Parse.
+
+
 0.09    2015-09-25 (PERLANCAR)
 
 	- [Incompatible change] Change coercion hint attribute from

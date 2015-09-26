@@ -238,7 +238,14 @@ sub _coerce_to_secs {
             return [200];
         }
     } elsif (eval { require Time::Duration::Parse::AsHash; $d = Time::Duration::Parse::AsHash::parse_duration($val) } && !$@) {
-        $args->{$arg_name} = $d;
+        $args->{$arg_name} =
+            ($d->{years}   // 0) * 365*86400 +
+            ($d->{months}  // 0) *  30*86400 +
+            ($d->{weeks}   // 0) *   7*86400 +
+            ($d->{days}    // 0) *     86400 +
+            ($d->{hours}   // 0) *      3600 +
+            ($d->{minutes} // 0) *        60 +
+            ($d->{seconds} // 0);
         return [200];
     }
 
