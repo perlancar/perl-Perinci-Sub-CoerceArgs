@@ -1,5 +1,12 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.12    2015-09-30 (PERLANCAR)
+
+	- No functional changes.
+
+	- Bump prereq version of Perinci::Sub::Normalize to 0.13 [CT].
+
+
 0.11    2015-09-26 (PERLANCAR)
 
 	- No functional changes.
