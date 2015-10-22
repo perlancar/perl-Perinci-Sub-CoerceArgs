@@ -1,5 +1,13 @@
 Revision history for Perinci-Sub-CoerceArgs
 
+0.13    2015-10-22 (PERLANCAR)
+
+	- No functional changes.
+
+	- Upgrade prereq Time::Duration::Parse::AsHash from recommends to
+	  required, but it's just a lite PP module.
+
+
 0.12    2015-09-30 (PERLANCAR)
 
 	- No functional changes.
